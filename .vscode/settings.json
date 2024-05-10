@@ -1,0 +1,9 @@
+{
+	"files.associations": {
+		"*.c": "c",
+		"sh1106.h": "c",
+		"bmp280.h": "c",
+		"stdlib.h": "c",
+		"stdint.h": "c"
+	}
+}

@@ -1,0 +1,1 @@
+#define LOGINT(a) printf("%d\n", (a))

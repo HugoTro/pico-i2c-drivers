@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.13)
+include(pico_sdk_import.cmake)
+project(i2c-drivers)
+pico_sdk_init()
+
+if (TARGET tinyusb_device)
+    add_executable(test src/test.c src/bmp280.c)
+    target_link_libraries(test pico_stdlib hardware_i2c)
+    pico_enable_stdio_usb(test 1)
+    pico_enable_stdio_uart(test 0)
+    pico_add_extra_outputs(test)
+
+elseif(PICO_ON_DEVICE)
+    message(WARNING "not building because TinyUSB submodule is not initialized in the SDK")
+endif()
