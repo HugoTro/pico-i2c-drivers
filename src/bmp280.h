@@ -1,5 +1,5 @@
 #ifndef BMP280_H
-#define BMP280_h
+#define BMP280_H
 
 #include <stdint.h>
 #include "hardware/i2c.h"

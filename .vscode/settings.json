@@ -4,6 +4,7 @@
 		"sh1106.h": "c",
 		"bmp280.h": "c",
 		"stdlib.h": "c",
-		"stdint.h": "c"
+		"stdint.h": "c",
+		"i2c.h": "c"
 	}
 }
