@@ -1,3 +1,8 @@
-cd build/
+if exist build/ (
+    cd build/
+) else (
+    mkdir build
+    cd build/
+)
 cmake -G "MinGW Makefiles" -DPICO_BOARD=pico_w ..
-make
+mingw32-make
