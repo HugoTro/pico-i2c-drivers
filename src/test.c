@@ -8,7 +8,7 @@
 uint32_t i2c_setup();
 
 int main() {
-	uint16_t bmp280cal_settings[12] = {0};
+	Bmp280CalibrationSettings b280_s;
 	stdio_init_all();
 	while (!stdio_usb_connected()) {};
 	printf("Starting setup...\n");
@@ -16,21 +16,21 @@ int main() {
 	printf("Baudrate set: %d\n", baudrate);
 	// Init with 0.5ms standby time, full x16 filter
 	// temp 2x OVS, press 16x OVS, and normal mode
-	printf("Init answer: %d\n", bmp280_init(0b00011100, 0b00111111));
+	printf("Init answer: %d\n", bmp280_init(0b00011100, 0b01011111));
 	printf("Calibration values:\n");
-	bmp280_get_calibration_settings(bmp280cal_settings);
-	printf("\tdig_T1: %hu\n", bmp280cal_settings[0]);
-	printf("\tdig_T2: %hd\n", bmp280cal_settings[1]);
-	printf("\tdig_T3: %hd\n", bmp280cal_settings[2]);
-	printf("\tdig_P1: %hu\n", bmp280cal_settings[3]);
-	printf("\tdig_P2: %hd\n", bmp280cal_settings[4]);
-	printf("\tdig_P3: %hd\n", bmp280cal_settings[5]);
-	printf("\tdig_P4: %hd\n", bmp280cal_settings[6]);
-	printf("\tdig_P5: %hd\n", bmp280cal_settings[7]);
-	printf("\tdig_P6: %hd\n", bmp280cal_settings[8]);
-	printf("\tdig_P7: %hd\n", bmp280cal_settings[9]);
-	printf("\tdig_P8: %hd\n", bmp280cal_settings[10]);
-	printf("\tdig_P9: %hd\n", bmp280cal_settings[11]);
+	bmp280_get_calibration_settings(&b280_s);
+	printf("\tdig_T1: %hu\n", b280_s.dig_T1);
+	printf("\tdig_T2: %hd\n", b280_s.dig_P2);
+	printf("\tdig_T3: %hd\n", b280_s.dig_P3);
+	printf("\tdig_P1: %hu\n", b280_s.dig_P1);
+	printf("\tdig_P2: %hd\n", b280_s.dig_P2);
+	printf("\tdig_P3: %hd\n", b280_s.dig_P3);
+	printf("\tdig_P4: %hd\n", b280_s.dig_P4);
+	printf("\tdig_P5: %hd\n", b280_s.dig_P5);
+	printf("\tdig_P6: %hd\n", b280_s.dig_P6);
+	printf("\tdig_P7: %hd\n", b280_s.dig_P7);
+	printf("\tdig_P8: %hd\n", b280_s.dig_P8);
+	printf("\tdig_P9: %hd\n", b280_s.dig_P9);
 
 	sleep_ms(1000);
 	uint32_t pressure, temperature;
