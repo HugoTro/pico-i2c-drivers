@@ -5,6 +5,7 @@
 		"bmp280.h": "c",
 		"stdlib.h": "c",
 		"stdint.h": "c",
-		"i2c.h": "c"
+		"i2c.h": "c",
+		"stdio.h": "c"
 	}
 }

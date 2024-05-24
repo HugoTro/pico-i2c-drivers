@@ -15,20 +15,20 @@ int bmp280_init(uint8_t config, uint8_t control_meas) {
 	// ctrl_meas reg setup (0xF4)
 	params[0] = reg_address;
 	params[1] = control_meas;
-	i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, params, 2, 0);
+	i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, params, 2, 0);
 
 	// config reg setup (0xF5)
 	reg_address++;
 	params[0] = reg_address;
 	params[1] = (conf_reg & 0x02);
 	params[1] |= (config & 0b11111101);
-	i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, params, 2, 0);
+	i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, params, 2, 0);
 
 	// Get calibration settings
 	reg_address = 0x88;
-	i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
+	i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
 	initialised = 1;
-	return i2c_read_blocking(I2C_STRUCT, BMP280_ADDRESS, (uint8_t *)&bmp280_calibration_settings, 24 /*(12*sizeof(uint16_t))/sizeof(uint8_t)*/, 0);
+	return i2c_read_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, (uint8_t *)&bmp280_calibration_settings, 24 /*(12*sizeof(uint16_t))/sizeof(uint8_t)*/, 0);
 }
 
 int bmp280_reset() {
@@ -36,7 +36,7 @@ int bmp280_reset() {
 		0xE0,
 		0xB6
 	};
-	return i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, params, 2, 0);
+	return i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, params, 2, 0);
 }
 
 int bmp280_get_calibration_settings(Bmp280CalibrationSettings *ptr) {
@@ -53,8 +53,8 @@ int bmp280_read_temp(uint32_t *temp) {
 		return -1;
 	}
 	const uint8_t reg_address = 0xFA;
-	i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
-	int ret = i2c_read_blocking(I2C_STRUCT, BMP280_ADDRESS, (uint8_t *)temp+1, 3, 0);
+	i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
+	int ret = i2c_read_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, (uint8_t *)temp+1, 3, 0);
 	// Fix memory alignment
 	(*temp) >>= 4;
 	(*temp) &= 0x000FFFFFu;
@@ -81,8 +81,8 @@ int bmp280_read_press(uint32_t *press) {
 		return -1;
 	}
 	const uint8_t reg_address = 0xF7;
-	i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
-	int ret = i2c_read_blocking(I2C_STRUCT, BMP280_ADDRESS, ((uint8_t *)press+1), 3, 0);
+	i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
+	int ret = i2c_read_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, ((uint8_t *)press+1), 3, 0);
 	// Fix memory alignment
 	(*press) >>= 4;
 	(*press) &= 0x000FFFFF;
@@ -95,8 +95,8 @@ int bmp280_read_all(uint32_t *temp, uint32_t *press) {
 	}
 	const uint8_t reg_address = 0xF7;
 	uint64_t tempo = 0;
-	i2c_write_blocking(I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
-	int ret = i2c_read_blocking(I2C_STRUCT, BMP280_ADDRESS, (uint8_t *)&tempo, 6, 0);
+	i2c_write_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, &reg_address, 1, 0);
+	int ret = i2c_read_blocking(BMP280_I2C_STRUCT, BMP280_ADDRESS, (uint8_t *)&tempo, 6, 0);
 	// Keep only the value, and delete null bits at the same time.
 	*(press) = (tempo & 0xFFFFF00000000000) >> 44;
 	// same thing here

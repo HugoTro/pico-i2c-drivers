@@ -8,7 +8,7 @@
 
 // User parameters
 #define BMP280_ADDRESS 0x77
-#define I2C_STRUCT i2c1
+#define BMP280_I2C_STRUCT i2c1
 
 struct Bmp280CalibrationSettings {
 						// LSB	/ MSB
