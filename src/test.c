@@ -50,27 +50,38 @@ int main() {
 	printf("Baudrate set: %d\n", baudrate);
 	printf("Setting up display...\n");
 	sh1106_init();
-	sh1106_clear_display();
-	printf("Display cleared\n");
-
-	sleep_ms(2000);
-	printf("Drawing rectangle 1...\n");
-	sh1106_draw_rectangle(20, 20, 20, 20, 0);
-
-	sleep_ms(2000);
-	printf("Drawing rectangle 2...\n");
-	sh1106_draw_rectangle(0, 50, 132, 1, 0);
-
-	printf("Rectangles should have appeared on the screen\n");
-	sleep_ms(2000);
-
-	for (uint8_t i = 0; i<8;i++) {
+	sh1106_clock_freq(0b01010000);
+	sh1106_set_page_number(4);
+	uint8_t buf[132] = {0xFF};
+	printf("%d\n", sh1106_write_bytes(buf, 132));
+	for (uint8_t i = 0; i < 8; i++) {
 		sh1106_set_page_number(i);
-		sh1106_set_column_number(0);
-		for (uint8_t j = 0; j<132; j++) {
-			sh1106_write_byte(0xFF);
-		}
+		uint8_t buf[132] = {0xFF};
+		printf("%hhu, %d, %hhu\n", i, sh1106_write_bytes(buf, 132), *buf);
+		sleep_ms(50);
 	}
+	// sh1106_clear_display();
+	// printf("Display cleared\n");
+
+	// sleep_ms(2000);
+	// printf("Drawing rectangle 1...\n");
+	// sh1106_draw_rectangle(20, 20, 20, 20, 0);
+
+	// sleep_ms(2000);
+	// printf("Drawing rectangle 2...\n");
+	// sh1106_draw_rectangle(0, 50, 132, 1, 0);
+
+	// printf("Rectangles should have appeared on the screen\n");
+	// sleep_ms(2000);
+
+	// for (uint8_t i = 0; i<8;i++) {
+	// 	sh1106_set_page_number(i);
+	// 	sh1106_set_column_number(0);
+	// 	for (uint8_t j = 0; j<132; j++) {
+	// 		sh1106_set_column_number(j);
+	// 		sh1106_write_byte(0xFF);
+	// 	}
+	// }
 	
 	return 0;
 }

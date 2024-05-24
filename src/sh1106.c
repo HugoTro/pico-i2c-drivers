@@ -124,11 +124,11 @@ int sh1106_write_byte(uint8_t byte) {
  *	\param len_bytes Length of the byte array
  */
 int sh1106_write_bytes(uint8_t *buffer, uint8_t len_bytes) {
-	static uint8_t byte_buffer[133] = {0};
+	static uint8_t byte_buffer[133];
 	// Not ideal, I know.
 	memcpy(byte_buffer+1, buffer, len_bytes);
 
-	static uint8_t commands[2] = {
+	uint8_t commands[2] = {
 		// ctrl byte
 		0b00000000,
 		// RMW mode
