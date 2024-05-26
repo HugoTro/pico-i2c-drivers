@@ -6,6 +6,10 @@
 		"stdlib.h": "c",
 		"stdint.h": "c",
 		"i2c.h": "c",
-		"stdio.h": "c"
-	}
+		"stdio.h": "c",
+		"pico.h": "c",
+		"types.h": "c",
+		"random": "c"
+	},
+	"C_Cpp.errorSquiggles": "disabled"
 }

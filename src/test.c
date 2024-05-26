@@ -2,6 +2,7 @@
 
 #include "pico/stdlib.h"
 #include "bmp280.h"
+#include "dht20.h"
 #include "sh1106.h"
 
 #define I2C_BAUDRATE 400000
@@ -48,18 +49,18 @@ int main() {
 	printf("Setting up I2C...\n");
 	int baudrate = i2c_setup();
 	printf("Baudrate set: %d\n", baudrate);
-	printf("Setting up display...\n");
-	sh1106_init();
-	sh1106_clock_freq(0b01010000);
-	sh1106_set_page_number(4);
-	uint8_t buf[132] = {0xFF};
-	printf("%d\n", sh1106_write_bytes(buf, 132));
-	for (uint8_t i = 0; i < 8; i++) {
-		sh1106_set_page_number(i);
-		uint8_t buf[132] = {0xFF};
-		printf("%hhu, %d, %hhu\n", i, sh1106_write_bytes(buf, 132), *buf);
-		sleep_ms(50);
-	}
+	// printf("Setting up display...\n");
+	// sh1106_init();
+	// sh1106_clock_freq(0b01010000);
+	// sh1106_set_page_number(4);
+	// uint8_t buf[132] = {0xFF};
+	// printf("%d\n", sh1106_write_bytes(buf, 132));
+	// for (uint8_t i = 0; i < 8; i++) {
+	// 	sh1106_set_page_number(i);
+	// 	uint8_t buf[132] = {0xFF};
+	// 	printf("%hhu, %d, %hhu\n", i, sh1106_write_bytes(buf, 132), *buf);
+	// 	sleep_ms(50);
+	// }
 	// sh1106_clear_display();
 	// printf("Display cleared\n");
 
@@ -82,26 +83,36 @@ int main() {
 	// 		sh1106_write_byte(0xFF);
 	// 	}
 	// }
+	dht20_init();
+	uint32_t t, h;
+	uint8_t s;
+	while (1) {
+		dht20_read_all(&t, &h);
+		dht20_read_status(&s);
+		printf("Status: %hhx\n", s);
+		printf("\t%u, %u, %f°C, %f%%\n", t, h, (t/1048576.0)*200-500, (h/1048576.0)*100);
+		sleep_ms(1000);
+	}
 	
 	return 0;
 }
 
-// uint32_t i2c_setup() {
-// 	uint32_t ret = i2c_init(i2c1, I2C_BAUDRATE);
-// 	gpio_set_function(14, GPIO_FUNC_I2C);
-// 	gpio_set_function(15, GPIO_FUNC_I2C);
-// 	// Obey i2c spec by pulling up the line, I guess ?
-// 	gpio_pull_up(14);
-// 	gpio_pull_up(15);
-// 	return ret;
-// }
-
 uint32_t i2c_setup() {
-	uint32_t ret = i2c_init(i2c0, I2C_BAUDRATE);
-	gpio_set_function(20, GPIO_FUNC_I2C);
-	gpio_set_function(21, GPIO_FUNC_I2C);
+	uint32_t ret = i2c_init(i2c1, I2C_BAUDRATE);
+	gpio_set_function(14, GPIO_FUNC_I2C);
+	gpio_set_function(15, GPIO_FUNC_I2C);
 	// Obey i2c spec by pulling up the line, I guess ?
-	gpio_pull_up(20);
-	gpio_pull_up(21);
+	gpio_pull_up(14);
+	gpio_pull_up(15);
 	return ret;
 }
+
+// uint32_t i2c_setup() {
+// 	uint32_t ret = i2c_init(i2c0, I2C_BAUDRATE);
+// 	gpio_set_function(20, GPIO_FUNC_I2C);
+// 	gpio_set_function(21, GPIO_FUNC_I2C);
+// 	// Obey i2c spec by pulling up the line, I guess ?
+// 	gpio_pull_up(20);
+// 	gpio_pull_up(21);
+// 	return ret;
+// }

@@ -4,7 +4,7 @@ project(i2c-drivers)
 pico_sdk_init()
 
 if (TARGET tinyusb_device)
-    add_executable(test src/test.c src/bmp280.c src/sh1106.c)
+    add_executable(test src/test.c src/bmp280.c src/sh1106.c src/dht20.c)
     target_link_libraries(test pico_stdlib hardware_i2c)
     pico_enable_stdio_usb(test 1)
     pico_enable_stdio_uart(test 0)
