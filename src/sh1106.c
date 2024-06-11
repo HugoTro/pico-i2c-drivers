@@ -3,22 +3,38 @@
 uint8_t clear_buffer[132] = {0};
 
 int sh1106_init() {
-	static const uint8_t startup_seq[10] = {
-		0b10000000, // not last instruction
-		0b10101101, // Control mode set DC-DC converter
-		0b10000000, // not last instruction
-		0b10001011, // Set DC-DC converter ON
-		0b10000000, // not last instruction
-		0b10101111, // Display ON
-		0b10000000, // not last instruction
-		0b10100110, // Display not color inverted
-		0b10000000,	// !last inst.
-		0b11001000, // Invert scanning
+
+	// DC-DC part
+	uint8_t instructions[3] = {
+		0b00000000,	// last, only data to follow
+		0b10101101,	// DC-DC control mode set
+		0b10001011	// Actually enable DC-DC
 	};
-	int ret = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, startup_seq, 10, 0);
+	printf("Result of display DC-DC init: %d\n", i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 3, 0));
+
+	// Display on part
+	instructions[0] = 0b00000000;	// last
+	instructions[1] = 0b10101111;	// Display ON
+
+	printf("Result of display ON: %d\n", i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 2, 0));
+
+	// static const uint8_t startup_seq[10] = {
+	// 	0b10000000, // not last instruction
+	// 	0b10101101, // Control mode set DC-DC converter
+	// 	0b10000000, // not last instruction
+	// 	0b10001011, // Set DC-DC converter ON
+	// 	0b10000000, // not last instruction
+	// 	0b10101111, // Display ON
+	// 	0b10000000, // not last instruction
+	// 	0b10100110, // Display not color inverted
+	// 	0b00000000,	// !last inst.
+	// 	0b11001000, // Invert scanning
+	// };
+	// int ret = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, startup_seq, 10, 0);
+
 	// Make sure first orders are sent at least 100ms after init sequence
 	sleep_ms(100);
-	return ret;
+	return 0;
 }
 
 int sh1106_screen_on() {
@@ -124,28 +140,26 @@ int sh1106_write_byte(uint8_t byte) {
  *	\param len_bytes Length of the byte array
  */
 int sh1106_write_bytes(uint8_t *buffer, uint8_t len_bytes) {
-	static uint8_t byte_buffer[133];
-	// Not ideal, I know.
-	memcpy(byte_buffer+1, buffer, len_bytes);
+	static uint8_t byte_buffer[135];
+	
+	// Low cost (like in shitty, not in O(1) complexity) memcpy function
+	#define COMMAND_OFFSET 3
+	for (uint8_t i = len_bytes+COMMAND_OFFSET-1; i>=COMMAND_OFFSET; i--) {
+		*(byte_buffer+i) = *(buffer+i-COMMAND_OFFSET);	
+	}
+	// Add correct control bytes
+	*byte_buffer = 0b10000000;	// !last, command
+	*(byte_buffer+1) = 0b11100000;	// Get in RMW mode
+	*(byte_buffer+2) = 0b01000000;	// Last control byte, RAM operation
 
-	uint8_t commands[2] = {
-		// ctrl byte
-		0b00000000,
-		// RMW mode
-		0b11100000,
-	};
-
-	// Send preliminary command
-	i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
-
-	// Add ctrl byte and send buffer
-	*byte_buffer = 0b01000000;
-	int res = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, len_bytes+1, 0);
+	// Send data buffer
+	int res = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, len_bytes+COMMAND_OFFSET, 0);
 
 	// get out of RMW mode
-	commands[1] = 0b11101110; // cmd
+	*byte_buffer = 0b00000000; // last, ctrl byte
+	*(byte_buffer+1) = 0b11101110; // cmd
 	// Send closing command
-	i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
+	i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, 2, 0);
 	return res;
 }
 

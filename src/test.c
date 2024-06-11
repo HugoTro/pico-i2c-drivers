@@ -3,7 +3,6 @@
 #include "pico/stdlib.h"
 #include "bmp280.h"
 #include "dht20.h"
-#include "sh1106.h"
 
 #define I2C_BAUDRATE 400000
 
