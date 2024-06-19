@@ -17,6 +17,7 @@ int sh1106_init();
 int sh1106_screen_on();
 int sh1106_screen_off();
 int sh1106_clock_freq(uint8_t);
+int sh1106_reverse_display(uint8_t);
 int sh1106_set_column_number(uint8_t);
 int sh1106_set_page_number(uint8_t);
 int sh1106_write_byte(uint8_t);

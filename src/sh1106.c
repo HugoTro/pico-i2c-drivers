@@ -67,6 +67,15 @@ int sh1106_clock_freq(uint8_t value) {
 	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 4, 0);
 }
 
+int sh1106_reverse_display(uint8_t on) {
+	uint8_t commands[2] = {
+		0b00000000,
+		0b10100110,
+	};
+	commands[1] |= (0x01 & on);
+	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
+}
+
 int sh1106_set_column_number(uint8_t column_number) {
 	if (column_number>=132) {
 		return -1;
@@ -127,6 +136,7 @@ int sh1106_write_byte(uint8_t byte) {
 		0b10000000,
 		0b11100000,
 		0b11000000,
+		// 0b01000000,
 		byte,
 		0b00000000,
 		0b11101110,
@@ -140,26 +150,28 @@ int sh1106_write_byte(uint8_t byte) {
  *	\param len_bytes Length of the byte array
  */
 int sh1106_write_bytes(uint8_t *buffer, uint8_t len_bytes) {
-	static uint8_t byte_buffer[135];
+	#define COMMAND_OFFSET 1
+	static uint8_t byte_buffer[132+COMMAND_OFFSET];
 	
 	// Low cost (like in shitty, not in O(1) complexity) memcpy function
-	#define COMMAND_OFFSET 3
 	for (uint8_t i = len_bytes+COMMAND_OFFSET-1; i>=COMMAND_OFFSET; i--) {
 		*(byte_buffer+i) = *(buffer+i-COMMAND_OFFSET);	
 	}
-	// Add correct control bytes
-	*byte_buffer = 0b10000000;	// !last, command
-	*(byte_buffer+1) = 0b11100000;	// Get in RMW mode
-	*(byte_buffer+2) = 0b01000000;	// Last control byte, RAM operation
+	// Add correct control byte
+	*byte_buffer = 0b01000000;
+	
+	// *byte_buffer = 0b10000000;	// !last, command
+	// *(byte_buffer+1) = 0b11100000;	// Get in RMW mode
+	// *(byte_buffer+2) = 0b01000000;	// Last control byte, RAM operation
 
 	// Send data buffer
 	int res = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, len_bytes+COMMAND_OFFSET, 0);
 
 	// get out of RMW mode
-	*byte_buffer = 0b00000000; // last, ctrl byte
-	*(byte_buffer+1) = 0b11101110; // cmd
-	// Send closing command
-	i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, 2, 0);
+	// *byte_buffer = 0b00000000; // last, ctrl byte
+	// *(byte_buffer+1) = 0b11101110; // cmd
+	// // Send closing command
+	// i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, 2, 0);
 	return res;
 }
 
@@ -221,8 +233,6 @@ int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t h
 void sh1106_clear_display() {
 	for (uint8_t i = 0; i < 8; i++) {
 		sh1106_set_page_number(i);
-		printf("\tPage number: %hhu\n", i);
-		int res = sh1106_write_bytes(clear_buffer, 132);
-		printf("\tLength of written buffer: %d\n", res);
+		sh1106_write_bytes(clear_buffer, 132);
 	}
 }
