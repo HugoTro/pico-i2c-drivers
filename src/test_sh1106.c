@@ -20,55 +20,52 @@ int main() {
 	printf("Setting up display...\n");
 	sh1106_init();
 
-	sh1106_reverse_display(1);
+	// sh1106_reverse_display(1);
+
+	sh1106_set_contrast(5);
 
 	// Clock to f_osc (0101) and divider = 1 (0000)
 	// sh1106_clock_freq(0b01010000);
 
 	// Reset settings
-	printf("set page number: %d\n", sh1106_set_page_number(0));
-	printf("set column number: %d\n", sh1106_set_column_number(0));
+	// printf("set page number: %d\n", sh1106_set_page_number(0));
+	// printf("set column number: %d\n", sh1106_set_column_number(0));
 
 	uint8_t buf[132] = {0xFF};
 	// printf("%d\n", sh1106_write_bytes(buf, 132));
-	for (uint8_t i = 0; i < 8; i++) {
-		printf("\tset page number: %d\n", sh1106_set_page_number(i));
-		sh1106_set_column_number(0);
-		printf("\t%hhu, %d\n", i, sh1106_write_bytes(buf, 132));
-		sleep_ms(500);
-	}
+	// for (uint8_t i = 0; i < 8; i++) {
+	// 	printf("\tset page number: %d\n", sh1106_set_page_number(i));
+	// 	sh1106_set_column_number(0);
+	// 	printf("\t%hhu, %d\n", i, sh1106_write_bytes(buf, 132));
+	// 	sleep_ms(10);
+	// }
 	sh1106_clear_display();
 	printf("Display cleared\n");
 
-	// sleep_ms(2000);
-	// printf("Drawing rectangle 1...\n");
-	// sh1106_draw_rectangle(20, 20, 20, 20, 0);
+	sh1106_draw_rectangle(20, 20, 20, 20, 0);
 
-	// sleep_ms(2000);
-	// printf("Drawing rectangle 2...\n");
-	// sh1106_draw_rectangle(0, 50, 132, 1, 0);
+	sh1106_draw_rectangle(0, 50, 132, 1, 0);
 
-	// printf("Rectangles should have appeared on the screen\n");
-	// sleep_ms(2000);
+	sh1106_draw_rectangle(50, 0, 20, 50, 0);
 
-	for (uint8_t i = 0; i<8;i++) {
-		sh1106_set_page_number(i);
-		sh1106_set_column_number(0);
-		for (uint8_t j = 0; j<132; j++) {
-			sh1106_set_column_number(j);
-			sh1106_write_byte(0x00);
-		}
-	}
+	// for (uint8_t i = 0; i<8;i++) {
+	// 	sh1106_set_page_number(i);
+	// 	sh1106_set_column_number(0);
+	// 	for (uint8_t j = 0; j<132; j++) {
+	// 		sh1106_set_column_number(j);
+	// 		sh1106_write_byte(0x00);
+	// 	}
+	// }
 
-	uint8_t a = 0;
-	while (true) {
-		sh1106_set_page_number(4);
-		printf("Starting scan...\n");
-		scanf("%hhu", &a);
-		printf("Column number: %hhu\n", a);
-		printf("Result: %d\n", sh1106_set_column_number(a));
-		printf("Result: %d\n", sh1106_write_byte(0));
-	}
+	// uint8_t a = 0;
+	// while (true) {
+	// 	sh1106_set_page_number(4);
+	// 	printf("Starting scan...\n");
+	// 	scanf("%hhu", &a);
+	// 	printf("Column number: %hhu\n", a);
+	// 	printf("Result: %d\n", sh1106_set_column_number(a));
+	// 	printf("Result: %d\n", sh1106_write_byte(0));
+	// }
 	
 	return 0;
 }

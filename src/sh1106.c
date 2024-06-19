@@ -1,7 +1,5 @@
 #include "sh1106.h"
 
-uint8_t clear_buffer[132] = {0};
-
 int sh1106_init() {
 
 	// DC-DC part
@@ -38,7 +36,7 @@ int sh1106_init() {
 }
 
 int sh1106_screen_on() {
-	static const uint8_t commands[2] = {
+	const uint8_t commands[2] = {
 		0b00000000,
 		0b10101111,
 	};
@@ -46,7 +44,7 @@ int sh1106_screen_on() {
 }
 
 int sh1106_screen_off() {
-	static const uint8_t commands[2] = {
+	const uint8_t commands[2] = {
 		0b00000000,
 		0b10101110,
 	};
@@ -76,11 +74,21 @@ int sh1106_reverse_display(uint8_t on) {
 	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
 }
 
+int sh1106_set_contrast(uint8_t constrast) {
+	uint8_t commands[4] = {
+		0b10000000,
+		0b10000001,
+		0b00000000,
+		constrast,
+	};
+	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 4, 0);
+}
+
 int sh1106_set_column_number(uint8_t column_number) {
 	if (column_number>=132) {
 		return -1;
 	}
-	static uint8_t commands[4] = {
+	uint8_t commands[4] = {
 		0b10000000,
 		0b00010000,
 		0b00000000,
@@ -100,7 +108,7 @@ int sh1106_set_column_number(uint8_t column_number) {
 */
 int sh1106_set_page_number(uint8_t page_number) {
 	// printf("Page number %hhu set.\n", page_number);
-	static uint8_t commands[2] = {
+	uint8_t commands[2] = {
 		0b00000000,
 		0b10110000,
 	};
@@ -151,7 +159,7 @@ int sh1106_write_byte(uint8_t byte) {
  */
 int sh1106_write_bytes(uint8_t *buffer, uint8_t len_bytes) {
 	#define COMMAND_OFFSET 1
-	static uint8_t byte_buffer[132+COMMAND_OFFSET];
+	uint8_t byte_buffer[132+COMMAND_OFFSET];
 	
 	// Low cost (like in shitty, not in O(1) complexity) memcpy function
 	for (uint8_t i = len_bytes+COMMAND_OFFSET-1; i>=COMMAND_OFFSET; i--) {
@@ -198,6 +206,7 @@ int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t h
 
 	// Otherwise it ends up here, will treat the outer pages first and then the inner ones - if applicable
 
+	// Lower side bytes
 	sh1106_set_page_number(pos_y/8);
 	sh1106_set_column_number(pos_x);
 	for (uint8_t i = 0; i < width; i++) {
@@ -205,24 +214,21 @@ int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t h
 	}
 	sh1106_write_bytes(byte_array, width);
 
+	// Upper side bytes
 	sh1106_set_page_number((pos_y+height)/8);
 	sh1106_set_column_number(pos_x);
 	for (uint8_t i = 0; i < width; i++) {
 		byte_array[i] = 0xFF >> (8-(pos_y+height)%8);
 	}
-
-	// If rectangle is only 2 pages "high"
-	if ((pos_y+height)%8-pos_y%8==2) {
-		return sh1106_write_bytes(byte_array, width);
-	}
 	sh1106_write_bytes(byte_array, width);
 
-	// Optimise performance by addressing 4 bytes at a time even though I think the compiler would've done it
-	for (uint8_t i = 0; i < 33; i++) {
-		*((uint32_t *)byte_array+i) = 0xFFFFFFFF;
+	// Inner bytes array filling
+	for (uint8_t i = 0; i < width; i++) {
+		byte_array[i] = 0xFF;
 	}
 
-	for (uint8_t page = pos_y/8+1; page < (pos_y+height)/8-1; page++) {
+	// Inner bytes bytes sending
+	for (uint8_t page = pos_y/8+1; page < (pos_y+height)/8; page++) {
 		sh1106_set_page_number(page);
 		sh1106_set_column_number(pos_x);
 		sh1106_write_bytes(byte_array, width);
@@ -231,8 +237,10 @@ int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t h
 }
 
 void sh1106_clear_display() {
+	uint8_t buffer[132] = {0};
 	for (uint8_t i = 0; i < 8; i++) {
 		sh1106_set_page_number(i);
-		sh1106_write_bytes(clear_buffer, 132);
+		sh1106_set_column_number(0);
+		sh1106_write_bytes(buffer, 132);
 	}
 }
