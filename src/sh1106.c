@@ -1,7 +1,7 @@
 #include "sh1106.h"
 
 // Array of 2 frames, 8 pages, and 132 columns for buffering
-uint8_t frame_buffer[2][8][132] = {0};
+uint8_t frame_buffer[8][132] = {0};
 
 int sh1106_init() {
 
@@ -131,7 +131,7 @@ int sh1106_set_pixel(uint8_t x, uint8_t y, uint8_t value) {
 		return -1;
 	}
 	value &= 0x01;
-	frame_buffer[1][y/8][x] |= (value << y%8);
+	frame_buffer[y/8][x] |= (value << y%8);
 	return 0;
 }
 
@@ -241,7 +241,7 @@ int sh1106_blit() {
 	for (uint8_t i = 0; i < 8; i++) {
 		sh1106_set_page_number(i);
 		sh1106_set_column_number(0);
-		sh1106_write_bytes(frame_buffer[1][i], 132);
+		sh1106_write_bytes(frame_buffer[i], 132);
 	}
 	return 0;
 }
