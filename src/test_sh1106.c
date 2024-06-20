@@ -48,6 +48,18 @@ int main() {
 
 	sh1106_draw_rectangle(50, 0, 20, 50, 0);
 
+	sh1106_set_page_number(0);
+	sh1106_set_column_number(120);
+	sh1106_write_byte(0x0F);
+
+	sleep_ms(5000);
+	for (uint8_t i = 0; i < 64; i++) {
+		for (uint8_t j = 0; j < 132; j++) {
+			sh1106_set_pixel(j, i, i%2 ^ j%2);
+		}
+	}
+	sh1106_blit();
+
 	// for (uint8_t i = 0; i<8;i++) {
 	// 	sh1106_set_page_number(i);
 	// 	sh1106_set_column_number(0);

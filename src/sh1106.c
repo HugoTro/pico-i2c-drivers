@@ -1,5 +1,8 @@
 #include "sh1106.h"
 
+// Array of 2 frames, 8 pages, and 132 columns for buffering
+uint8_t frame_buffer[2][8][132] = {0};
+
 int sh1106_init() {
 
 	// DC-DC part
@@ -8,34 +11,23 @@ int sh1106_init() {
 		0b10101101,	// DC-DC control mode set
 		0b10001011	// Actually enable DC-DC
 	};
-	printf("Result of display DC-DC init: %d\n", i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 3, 0));
+	i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 3, 0);
 
 	// Display on part
-	instructions[0] = 0b00000000;	// last
-	instructions[1] = 0b10101111;	// Display ON
+	// instructions[0] = 0b00000000;	// last
+	// instructions[1] = 0b10101111;	// Display ON
 
-	printf("Result of display ON: %d\n", i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 2, 0));
-
-	// static const uint8_t startup_seq[10] = {
-	// 	0b10000000, // not last instruction
-	// 	0b10101101, // Control mode set DC-DC converter
-	// 	0b10000000, // not last instruction
-	// 	0b10001011, // Set DC-DC converter ON
-	// 	0b10000000, // not last instruction
-	// 	0b10101111, // Display ON
-	// 	0b10000000, // not last instruction
-	// 	0b10100110, // Display not color inverted
-	// 	0b00000000,	// !last inst.
-	// 	0b11001000, // Invert scanning
-	// };
-	// int ret = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, startup_seq, 10, 0);
+	// i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 2, 0);
+	
 
 	// Make sure first orders are sent at least 100ms after init sequence
 	sleep_ms(100);
+	sh1106_clear_display();
+	sh1106_display_on();
 	return 0;
 }
 
-int sh1106_screen_on() {
+int sh1106_display_on() {
 	const uint8_t commands[2] = {
 		0b00000000,
 		0b10101111,
@@ -43,7 +35,7 @@ int sh1106_screen_on() {
 	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
 }
 
-int sh1106_screen_off() {
+int sh1106_display_off() {
 	const uint8_t commands[2] = {
 		0b00000000,
 		0b10101110,
@@ -117,7 +109,7 @@ int sh1106_set_page_number(uint8_t page_number) {
 }
 
 /*!
- *	\brief Write a single pixel to the screen, erasing the byte containing it
+ *	\brief Write a single pixel to the display, erasing the byte containing it
  *	\param x Position on the x axis [0, 131]
  *	\param y Position on the y axis [0, 63]
  *	\returns The result of the sh1106_write_byte() function used last.
@@ -134,22 +126,31 @@ int sh1106_write_pixel(uint8_t x, uint8_t y, uint8_t value) {
 	return sh1106_write_byte((value << y%8));
 }
 
+int sh1106_set_pixel(uint8_t x, uint8_t y, uint8_t value) {
+	if (x>=132 || y>=64) {
+		return -1;
+	}
+	value &= 0x01;
+	frame_buffer[1][y/8][x] |= (value << y%8);
+	return 0;
+}
+
 /*!
- *	\brief Write a byte to the screen
+ *	\brief Write a byte to the display
  *	\param byte The byte to write
  *	\returns The result of the i2c_write_blocking() function
 */
 int sh1106_write_byte(uint8_t byte) {
-	uint8_t commands[6] = {
-		0b10000000,
-		0b11100000,
-		0b11000000,
-		// 0b01000000,
+	uint8_t commands[2] = {
+		// 0b10000000,
+		// 0b11100000,
+		// 0b11000000,
+		0b01000000,
 		byte,
-		0b00000000,
-		0b11101110,
+		// 0b00000000,
+		// 0b11101110,
 	};
-	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 6, 0);
+	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
 }
 
 /*!
@@ -183,7 +184,7 @@ int sh1106_write_bytes(uint8_t *buffer, uint8_t len_bytes) {
 	return res;
 }
 
-int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t height, uint8_t corner_radius) {
+int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t height, uint8_t color) {
 	// Verify coordinates are within theoretical boundaries (avoids overflow in the next step)
 	if (width>132 || height>64 || pos_x>=132 || pos_y>=64) {
 		return -1;
@@ -232,6 +233,15 @@ int sh1106_draw_rectangle(uint8_t pos_x, uint8_t pos_y, uint8_t width, uint8_t h
 		sh1106_set_page_number(page);
 		sh1106_set_column_number(pos_x);
 		sh1106_write_bytes(byte_array, width);
+	}
+	return 0;
+}
+
+int sh1106_blit() {
+	for (uint8_t i = 0; i < 8; i++) {
+		sh1106_set_page_number(i);
+		sh1106_set_column_number(0);
+		sh1106_write_bytes(frame_buffer[1][i], 132);
 	}
 	return 0;
 }
