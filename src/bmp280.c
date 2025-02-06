@@ -1,6 +1,4 @@
 #include "bmp280.h"
-#include <string.h>
-#include <stdio.h>
 
 Bmp280CalibrationSettings bmp280_calib;
 uint8_t initialised = 0;

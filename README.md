@@ -5,3 +5,5 @@ This library is a collection of various i2c drivers made for various sensors and
 - bmp280: <span style="color:green">Working</span>
 - dht20: <span style="color:red">Broken</span>
 - sh1106: <span style="color:green">Working</span>, rectangle round corners not implemented
+- bme280: <span style="color:red">Not ready</span>
+- lsm6dsox: <span style="color:red">Not started</span>

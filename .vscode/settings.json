@@ -10,7 +10,15 @@
 		"pico.h": "c",
 		"types.h": "c",
 		"random": "c",
-		"cstdint": "c"
+		"cstdint": "c",
+		"string.h": "c",
+		"array": "c",
+		"string": "c",
+		"string_view": "c",
+		"ranges": "c",
+		"span": "c",
+		"bme680.h": "c"
 	},
-	"C_Cpp.errorSquiggles": "disabled"
+	"C_Cpp.errorSquiggles": "disabled",
+	"cmake.configureOnOpen": false
 }
