@@ -1,0 +1,29 @@
+html, body {
+	padding: 0px;
+	margin: 0px;
+}
+
+h1 {
+	margin: 0px;
+}
+
+.checkbox {
+	width: 18px;
+}
+
+p {
+	text-align: center;
+}
+
+#div1 {
+	width: 200px;
+	display: grid;
+	justify-content: center;
+	align-items: center;
+}
+
+#font-editor {
+	display: grid;
+	grid-template-columns: repeat(4,18px);
+	grid-template-rows: repeat(4,18px);
+}

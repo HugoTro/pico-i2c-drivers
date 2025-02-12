@@ -105,13 +105,3 @@ uint32_t i2c_setup() {
 	gpio_pull_up(15);
 	return ret;
 }
-
-// uint32_t i2c_setup() {
-// 	uint32_t ret = i2c_init(i2c0, I2C_BAUDRATE);
-// 	gpio_set_function(20, GPIO_FUNC_I2C);
-// 	gpio_set_function(21, GPIO_FUNC_I2C);
-// 	// Obey i2c spec by pulling up the line, I guess ?
-// 	gpio_pull_up(20);
-// 	gpio_pull_up(21);
-// 	return ret;
-// }

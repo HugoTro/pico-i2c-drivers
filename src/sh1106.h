@@ -6,6 +6,8 @@
 #include <string.h>
 #include "hardware/i2c.h"
 
+#include "fonts.h"
+
 // MAX SH1106 I2C SPEED: 400kbit/s
 
 // User parameters
@@ -25,6 +27,7 @@ int sh1106_write_byte(uint8_t);
 int sh1106_write_bytes(uint8_t *, uint8_t);
 int sh1106_write_pixel(uint8_t, uint8_t, uint8_t);
 int sh1106_set_pixel(uint8_t, uint8_t, uint8_t);
+int sh1106_set_letter(uint8_t, uint8_t, uint8_t);
 int sh1106_draw_rectangle(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
 int sh1106_blit();
 void sh1106_clear_display();

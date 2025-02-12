@@ -11,7 +11,7 @@ int main() {
 
 	// Preliminary setup (debug + i2c)
 	stdio_init_all();
-	// while (!stdio_usb_connected()) {};
+	while (!stdio_usb_connected()) {};
 	printf("Setting up I2C...\n");
 	int baudrate = i2c_setup();
 	printf("Baudrate set: %d\n", baudrate);
@@ -41,6 +41,7 @@ int main() {
 	// }
 	sh1106_clear_display();
 	printf("Display cleared\n");
+	printf("Drawing rectangles...\n");
 
 	sh1106_draw_rectangle(20, 20, 20, 20, 0);
 
@@ -52,12 +53,25 @@ int main() {
 	sh1106_set_column_number(120);
 	sh1106_write_byte(0x0F);
 
-	sleep_ms(5000);
-	for (uint8_t i = 0; i < 64; i++) {
-		for (uint8_t j = 0; j < 132; j++) {
-			sh1106_set_pixel(j, i, i%2 ^ j%2);
+	sleep_ms(2000);
+	printf("Filling frame buffer...\n");
+	// for (uint8_t i = 0; i < 64; i++) {
+	// 	for (uint8_t j = 0; j < 132; j++) {
+	// 		sh1106_set_pixel(j, i, i%2 ^ j%2);
+	// 	}
+	// }
+	printf("Setting letters...\n");
+	uint8_t x_pos = 4;
+	uint8_t y_pos = 0;
+	for (uint8_t i = 0x30; i < 0x5B; i++) {
+		sh1106_set_letter(x_pos, y_pos, i);
+		x_pos += 8;
+		if (x_pos>120) {
+			x_pos=4;
+			y_pos+=10;
 		}
 	}
+	printf("Blitting buffer contents on the screen\n");
 	sh1106_blit();
 
 	// for (uint8_t i = 0; i<8;i++) {

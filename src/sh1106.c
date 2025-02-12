@@ -3,8 +3,11 @@
 // Array of 2 frames, 8 pages, and 132 columns for buffering
 uint8_t frame_buffer[8][132] = {0};
 
+Font *current_font = NULL;
+
 int sh1106_init() {
 
+	current_font = &default_font;
 	// DC-DC part
 	uint8_t instructions[3] = {
 		0b00000000,	// last, only data to follow
@@ -12,12 +15,6 @@ int sh1106_init() {
 		0b10001011	// Actually enable DC-DC
 	};
 	i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 3, 0);
-
-	// Display on part
-	// instructions[0] = 0b00000000;	// last
-	// instructions[1] = 0b10101111;	// Display ON
-
-	// i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, instructions, 2, 0);
 	
 
 	// Make sure first orders are sent at least 100ms after init sequence
@@ -131,7 +128,38 @@ int sh1106_set_pixel(uint8_t x, uint8_t y, uint8_t value) {
 		return -1;
 	}
 	value &= 0x01;
-	frame_buffer[y/8][x] |= (value << y%8);
+	if (value) {
+		frame_buffer[y/8][x] |= (1 << y%8);
+	} else {
+		frame_buffer[y/8][x] &= ~(1 << y%8);
+	}
+	return 0;
+}
+
+int sh1106_set_letter(uint8_t x, uint8_t y, uint8_t letter) {
+	if (x>131-8 || y>63-8) {
+		return -1;
+	}
+
+	// i is for lines
+	for (uint8_t i = 0; i < 8; i++) {
+		// columns
+		for (uint8_t j = 0; j < 8; j++) {
+			// We'll have to use a mask and bit shift to get the actual bit value from the font
+			// 0x30 is the beggining of the char map, that's where numbers start in ASCII
+			uint8_t pixel_value = ((*current_font)[letter-0x30][i] >> 7-j) & 0x01;
+			// sh1106_set_pixel(y+j, x+i, pixel_value);
+
+			// This could be used to optimise how this works
+			sh1106_set_pixel(x+j, y+i, pixel_value);
+			// if (pixel_value==1) {
+			// 	sh1106_set_pixel(x+j, y+i, 1);
+			// 	// frame_buffer[(y+j)/8][x+i] |= (1 << ((y+j)/8));
+			// } else {
+			// 	frame_buffer[(y+i)/8][x+j] &= ~(1 << ((y+i)/8));
+			// }
+		}
+	}
 	return 0;
 }
 
@@ -142,13 +170,8 @@ int sh1106_set_pixel(uint8_t x, uint8_t y, uint8_t value) {
 */
 int sh1106_write_byte(uint8_t byte) {
 	uint8_t commands[2] = {
-		// 0b10000000,
-		// 0b11100000,
-		// 0b11000000,
 		0b01000000,
 		byte,
-		// 0b00000000,
-		// 0b11101110,
 	};
 	return i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, commands, 2, 0);
 }
@@ -168,19 +191,9 @@ int sh1106_write_bytes(uint8_t *buffer, uint8_t len_bytes) {
 	}
 	// Add correct control byte
 	*byte_buffer = 0b01000000;
-	
-	// *byte_buffer = 0b10000000;	// !last, command
-	// *(byte_buffer+1) = 0b11100000;	// Get in RMW mode
-	// *(byte_buffer+2) = 0b01000000;	// Last control byte, RAM operation
 
 	// Send data buffer
 	int res = i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, len_bytes+COMMAND_OFFSET, 0);
-
-	// get out of RMW mode
-	// *byte_buffer = 0b00000000; // last, ctrl byte
-	// *(byte_buffer+1) = 0b11101110; // cmd
-	// // Send closing command
-	// i2c_write_blocking(SH1106_I2C_STRUCT, SH1106_ADDRESS, byte_buffer, 2, 0);
 	return res;
 }
 

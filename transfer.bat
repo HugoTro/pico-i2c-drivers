@@ -1,0 +1,1 @@
+copy build\test_sh1106.uf2 f:\
