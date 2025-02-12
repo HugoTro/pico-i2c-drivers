@@ -29,8 +29,8 @@ int main() {
 		bmp280_read_results(results);
 		Bmp280Results converted_results;
 		bmp280_convert_results(results, &converted_results);
-		printf("Actual temp: %.4f°C\n", converted_results.temperature);
-		printf("Actual temp: %.6fhPa\n", converted_results.pressure/100.0);
+		printf("Temperature: %.4f°C\n", converted_results.temperature);
+		printf("Pressure: %.6fhPa\n", converted_results.pressure/100.0);
 		sleep_ms(1000);
 	}
 	
