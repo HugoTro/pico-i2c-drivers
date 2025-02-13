@@ -13,18 +13,22 @@ if (TARGET tinyusb_device)
     target_link_libraries(test pico_stdlib hardware_i2c)
     target_link_libraries(test_sh1106 pico_stdlib hardware_i2c)
     target_link_libraries(test_bmp280 pico_stdlib hardware_i2c)
+	target_link_libraries(test_bme680 pico_stdlib hardware_i2c)
 
     pico_enable_stdio_usb(test 1)
     pico_enable_stdio_usb(test_sh1106 1)
     pico_enable_stdio_usb(test_bmp280 1)
+	pico_enable_stdio_usb(test_bme680 1)
 
     pico_enable_stdio_uart(test 0)
     pico_enable_stdio_uart(test_sh1106 0)
     pico_enable_stdio_uart(test_bmp280 0)
+	pico_enable_stdio_uart(test_bme680 0)
 
     pico_add_extra_outputs(test)
     pico_add_extra_outputs(test_sh1106)
     pico_add_extra_outputs(test_bmp280)
+	pico_add_extra_outputs(test_bme680)
 
 elseif(PICO_ON_DEVICE)
     message(WARNING "not building because TinyUSB submodule is not initialized in the SDK")

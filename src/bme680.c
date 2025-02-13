@@ -1,5 +1,7 @@
 #include "bme680.h"
 
+Bme680CalibrationSettings bme680calib;
+
 /*!
  * \brief Initializes the bme680. Must be called before any other function.
  * It will use the address and i2c channel given in bme680.h
@@ -13,11 +15,36 @@ int bme680_init(uint8_t ctrl_meas, uint8_t ctrl_hum) {
 
 	// ctrl_hum has reserved values, so we get them from the register and then write.
 	uint8_t ctrl_hum_value;
-	bme680_read_bytes(0x72, &ctrl_hum_value, 1);
-	ctrl_hum |= ctrl_hum_value;
+	printf("first read: %d\n", bme680_read_bytes(0x72, &ctrl_hum_value, 1));
+	printf("ctr_hum value: %hhu\n", ctrl_hum_value);
 
-	bme680_write_bytes(0x74, &ctrl_meas, 1);
-	return bme680_write_bytes(0x72, &ctrl_hum, 1);
+	if (bme680_write_bytes(0x74, &ctrl_meas, 1)==-1) {
+		return -3;
+	}
+	if (bme680_write_bytes(0x72, &ctrl_hum, 1)==-1) {
+		return -1;
+	}
+	sleep_ms(1000);
+	bme680_init_calibration_settings();
+	return 0;
+}
+
+int bme680_init_calibration_settings() {
+	bme680_read_bytes(0xEA, (uint8_t *)(&bme680calib.par_t1)+1, 1);
+	// bme680calib.par_t1 <<= 8;
+	bme680_read_bytes(0xE9, (uint8_t *)&bme680calib.par_t1, 1);
+
+	bme680_read_bytes(0x81, (uint8_t *)(&bme680calib.par_t2), 2);
+
+	bme680_read_bytes(0x8C, &bme680calib.par_t3, 1);
+
+	bme680_read_bytes(0x24, (uint8_t *)(&bme680calib.temp_adc), 1);
+	bme680_read_bytes(0x23, (uint8_t *)(&bme680calib.temp_adc)+1, 1);
+	bme680_read_bytes(0x22, (uint8_t *)(&bme680calib.temp_adc)+2, 1);
+	bme680calib.temp_adc >>= 4;
+	bme680calib.temp_adc &= 0x000FFFFF;
+
+	return 0;
 }
 
 int bme680_reset() {
@@ -37,14 +64,47 @@ int bme680_start_measurement_non_blocking() {
 	uint8_t ctrl_reg = 0;
 	bme680_read_bytes(0x74, &ctrl_reg, 1);
 	ctrl_reg |= 0x01; // Forced mode
-	return bme680_write_bytes(0x74, &ctrl_reg, 1);
+	int ret = bme680_write_bytes(0x74, &ctrl_reg, 1);
+	return ret;
+}
+
+int bme680_get_status(uint8_t *status) {
+	return bme680_read_bytes(0x1D, status, 1);
 }
 
 /*!
  * \brief reads and converts the results, because no one cares about raw sensor values.
  */
 int bme680_read_results(Bme680Results *results) {
+	uint8_t status;
+	do {
+		bme680_get_status(&status);
+		sleep_us(100);
+	} while ((status & 0x80) >> 7);
+	uint8_t raw_results[8] = {0};
+	bme680_read_bytes(0x1F, raw_results, 8);
 
+	uint32_t raw_pressure = raw_results[0] << 12;
+	raw_pressure |= raw_results[1] << 4;
+	raw_pressure |= (raw_results[2] >> 4) & 0x0F;
+
+	uint32_t raw_temperature = raw_results[3] << 12;
+	raw_temperature |= raw_results[4] << 4;
+	raw_temperature |= (raw_results[5] >> 4) & 0x0F;
+
+	uint16_t raw_humidity = raw_results[6] << 8;
+	raw_humidity |= raw_results[7];
+
+	printf("Raw pressure: 0x%X\n", raw_pressure);
+	printf("Raw temperature: 0x%X\n", raw_temperature);
+	printf("Raw humidity: 0x%X\n", raw_humidity);
+
+	// pressure
+	double var1 = (raw_temperature/16384.0 - bme680calib.par_t1/1024.0)*bme680calib.par_t2;
+	double var2 = (raw_temperature/131072.0 - bme680calib.par_t1/8192.0)*(raw_temperature/131072.0 - bme680calib.par_t1/8192.0)*(bme680calib.par_t3*16.0);
+	results->temperature = (var1+var2)/5120.0;
+
+	return 0;
 }
 
 
