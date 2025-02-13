@@ -63,7 +63,7 @@ int main() {
 	printf("Setting letters...\n");
 	uint8_t x_pos = 4;
 	uint8_t y_pos = 0;
-	for (uint8_t i = 0x30; i < 0x5B; i++) {
+	for (uint8_t i = SH1106_CHAR_MAPS_START; i <= SH1106_CHAR_MAPS_END; i++) {
 		sh1106_set_letter(x_pos, y_pos, i);
 		x_pos += 8;
 		if (x_pos>120) {

@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 
-// 43 is enough to hold from 0 to Z in the ASCII charmap.
-typedef uint8_t Font[43][8];
+#define SH1106_CHAR_MAPS_START 0x2E
+#define SH1106_CHAR_MAPS_END 0x5A // Last character address represented in fonts arrays.
+
+
+typedef uint8_t Font[SH1106_CHAR_MAPS_END-SH1106_CHAR_MAPS_START+1][8];
 
 extern Font default_font;
 

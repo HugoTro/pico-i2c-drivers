@@ -146,18 +146,8 @@ int sh1106_set_letter(uint8_t x, uint8_t y, uint8_t letter) {
 		// columns
 		for (uint8_t j = 0; j < 8; j++) {
 			// We'll have to use a mask and bit shift to get the actual bit value from the font
-			// 0x30 is the beggining of the char map, that's where numbers start in ASCII
-			uint8_t pixel_value = ((*current_font)[letter-0x30][i] >> 7-j) & 0x01;
-			// sh1106_set_pixel(y+j, x+i, pixel_value);
-
-			// This could be used to optimise how this works
+			uint8_t pixel_value = ((*current_font)[letter-SH1106_CHAR_MAPS_START][i] >> 7-j) & 0x01;
 			sh1106_set_pixel(x+j, y+i, pixel_value);
-			// if (pixel_value==1) {
-			// 	sh1106_set_pixel(x+j, y+i, 1);
-			// 	// frame_buffer[(y+j)/8][x+i] |= (1 << ((y+j)/8));
-			// } else {
-			// 	frame_buffer[(y+i)/8][x+j] &= ~(1 << ((y+i)/8));
-			// }
 		}
 	}
 	return 0;

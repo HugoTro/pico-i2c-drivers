@@ -38,6 +38,7 @@ int main() {
 	while (1) {
 		printf("Starting measurement...\n");
 		bmp280_start_measurement_blocking();
+		// sh1106_clear_display();
 		bmp280_read_results(results);
 		Bmp280Results converted_results;
 		bmp280_convert_results(results, &converted_results);
@@ -50,16 +51,16 @@ int main() {
 		uint16_t lot_pressure = (uint16_t)(converted_results.pressure);
 
 		snprintf(char_buf, 10, "%hu", lot_temperature);
-		
-		sh1106_set_letter(pos[0], pos[1], char_buf[0]);
-		pos[0]+=10;
-		sh1106_set_letter(pos[0], pos[1], char_buf[1]);
-		pos[0]+=20;
-		sh1106_set_letter(pos[0], pos[1], char_buf[2]);
-		pos[0]+=10;
-		sh1106_set_letter(pos[0], pos[1], char_buf[3]);
-		pos[0]+=10;
-		sh1106_set_letter(pos[0], pos[1], char_buf[4]);
+
+		for (uint8_t i = 0; i < 5; i++) {
+			sh1106_set_letter(pos[0], pos[1], char_buf[i]);
+			pos[0]+=10;
+			if (i==1) {
+				sh1106_set_letter(pos[0], pos[1], '.');
+				pos[0]+=10;
+			}
+		}
+		sh1106_set_letter(pos[0], pos[1], 'C');
 
 		sh1106_blit();
 
