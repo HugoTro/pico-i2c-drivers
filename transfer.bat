@@ -1,1 +1,1 @@
-copy build\test.uf2 f:\
+copy build\test_bme280.uf2 f:\

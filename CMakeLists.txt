@@ -8,6 +8,7 @@ if (TARGET tinyusb_device)
     add_executable(test src/test.c src/bmp280.c src/fonts.c src/sh1106.c)
     add_executable(test_sh1106 src/test_sh1106.c src/fonts.c src/sh1106.c)
     add_executable(test_bmp280 src/test_bmp280.c src/bmp280.c)
+    add_executable(test_bme680 src/test_bme680.c src/bme680.c)
 
     target_link_libraries(test pico_stdlib hardware_i2c)
     target_link_libraries(test_sh1106 pico_stdlib hardware_i2c)

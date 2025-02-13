@@ -31,7 +31,7 @@ int bmp280_get_status(uint8_t *status_byte) {
 
 /*!
  * \brief This function doesn't do anything visible.
- * It is filling in the calibration settings struct present in this file.
+ * It fills in the calibration settings struct present in this file.
  */
 int bmp280_init_calibration_settings() {
 	return bmp280_read_bytes(0x88, (uint8_t *)&bmp280_calib, 24);
