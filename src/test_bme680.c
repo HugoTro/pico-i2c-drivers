@@ -14,8 +14,8 @@ int main() {
 	while (!stdio_usb_connected()) {}
 
 	printf("I2C setup: %u\n", i2c_setup());
-	// x1 ovs on all values
-	int status = bme680_init(0b00100100, 0b00000001);
+	// x1 ovs on all values but temperature: x4
+	int status = bme680_init(0b01100100, 0b00000001);
 	if (status) {
 		printf("Could not intialize bme680 with error code %d\n", status);
 		while (1) {}
@@ -45,10 +45,9 @@ int main() {
 	bme680_read_bytes(0x22, &debug_buffer, 1);
 	printf("temp_adc MSB: 0x%hhX\n", debug_buffer);
 
-	bme680_init_calibration_settings();
-
 	Bme680Results results;
 	while (1) {
+		bme680_init_calibration_settings();
 		bme680_start_measurement_non_blocking();
 		bme680_read_results(&results);
 		printf("Temperature: %.6f°C\n\n", results.temperature);

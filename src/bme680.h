@@ -8,7 +8,7 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-#define BME680_ADDRESS 0x77
+#define BME680_ADDRESS 0x76
 #define BME680_I2C_STRUCT i2c0
 
 struct Bme680CalibrationSettings {

@@ -99,7 +99,7 @@ int bme680_read_results(Bme680Results *results) {
 	printf("Raw temperature: 0x%X\n", raw_temperature);
 	printf("Raw humidity: 0x%X\n", raw_humidity);
 
-	// pressure
+	// temperature
 	double var1 = (raw_temperature/16384.0 - bme680calib.par_t1/1024.0)*bme680calib.par_t2;
 	double var2 = (raw_temperature/131072.0 - bme680calib.par_t1/8192.0)*(raw_temperature/131072.0 - bme680calib.par_t1/8192.0)*(bme680calib.par_t3*16.0);
 	results->temperature = (var1+var2)/5120.0;
