@@ -18,6 +18,8 @@ int bme680_init(uint8_t ctrl_meas, uint8_t ctrl_hum) {
 	printf("first read: %d\n", bme680_read_bytes(0x72, &ctrl_hum_value, 1));
 	printf("ctr_hum value: %hhu\n", ctrl_hum_value);
 
+	ctrl_hum |= (ctrl_hum_value & 0b1111100);
+
 	if (bme680_write_bytes(0x74, &ctrl_meas, 1)==-1) {
 		return -3;
 	}
@@ -31,10 +33,13 @@ int bme680_init(uint8_t ctrl_meas, uint8_t ctrl_hum) {
 
 int bme680_init_calibration_settings() {
 	bme680_read_bytes(0xEA, (uint8_t *)(&bme680calib.par_t1)+1, 1);
+	printf("CAL: 0xEA (par_t1 MSB): 0x%hhX\n", (uint8_t *)(&bme680calib.par_t1)+1);
 	// bme680calib.par_t1 <<= 8;
 	bme680_read_bytes(0xE9, (uint8_t *)&bme680calib.par_t1, 1);
+	printf("CAL: 0xE9 (par_t1 LSB): 0x%hhX\n", bme680calib.par_t1);
 
-	bme680_read_bytes(0x81, (uint8_t *)(&bme680calib.par_t2), 2);
+	bme680_read_bytes(0x8A, (uint8_t *)(&bme680calib.par_t2), 2);
+	printf("CAL: 0x8A+0x8B: 0x%hX\n", bme680calib.par_t2);
 
 	bme680_read_bytes(0x8C, &bme680calib.par_t3, 1);
 
@@ -95,9 +100,9 @@ int bme680_read_results(Bme680Results *results) {
 	uint16_t raw_humidity = raw_results[6] << 8;
 	raw_humidity |= raw_results[7];
 
-	printf("Raw pressure: 0x%X\n", raw_pressure);
-	printf("Raw temperature: 0x%X\n", raw_temperature);
-	printf("Raw humidity: 0x%X\n", raw_humidity);
+	// printf("Raw pressure: 0x%X\n", raw_pressure);
+	// printf("Raw temperature: 0x%X\n", raw_temperature);
+	// printf("Raw humidity: 0x%X\n", raw_humidity);
 
 	// temperature
 	double var1 = (raw_temperature/16384.0 - bme680calib.par_t1/1024.0)*bme680calib.par_t2;
