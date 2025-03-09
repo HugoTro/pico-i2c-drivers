@@ -28,7 +28,6 @@ struct lsm6dsoxAngVel {
 };
 typedef struct lsm6dsoxAngVel lsm6dsoxAngVel;
 
-
 int lsm6dsox_init(uint8_t, uint8_t);
 int lsm6dsox_reset();
 int lsm6dsox_get_whoami(uint8_t *);

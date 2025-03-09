@@ -6,7 +6,7 @@ Bme680CalibrationSettings bme680calib;
  * \brief Initializes the bme680. Must be called before any other function.
  * It will use the address and i2c channel given in bme680.h
  * \param ctrl_meas Register containing the oversampling settings for temperature and pressure.
- * \param ctrl_hum Register contatining the oversamplig settings for humidity.
+ * \param ctrl_hum Register containing the oversampling settings for humidity.
  * \returns result of the last writing function
  */
 int bme680_init(uint8_t ctrl_meas, uint8_t ctrl_hum) {
@@ -32,24 +32,64 @@ int bme680_init(uint8_t ctrl_meas, uint8_t ctrl_hum) {
 }
 
 int bme680_init_calibration_settings() {
-	bme680_read_bytes(0xEA, (uint8_t *)(&bme680calib.par_t1)+1, 1);
-	printf("CAL: 0xEA (par_t1 MSB): 0x%hhX\n", (uint8_t *)(&bme680calib.par_t1)+1);
-	// bme680calib.par_t1 <<= 8;
-	bme680_read_bytes(0xE9, (uint8_t *)&bme680calib.par_t1, 1);
-	printf("CAL: 0xE9 (par_t1 LSB): 0x%hhX\n", bme680calib.par_t1);
-
+	// Temperature calibration settings
+	bme680_read_bytes(0xE9, (uint8_t *)(&bme680calib.par_t1), 2);
 	bme680_read_bytes(0x8A, (uint8_t *)(&bme680calib.par_t2), 2);
-	printf("CAL: 0x8A+0x8B: 0x%hX\n", bme680calib.par_t2);
-
 	bme680_read_bytes(0x8C, &bme680calib.par_t3, 1);
 
-	bme680_read_bytes(0x24, (uint8_t *)(&bme680calib.temp_adc), 1);
-	bme680_read_bytes(0x23, (uint8_t *)(&bme680calib.temp_adc)+1, 1);
-	bme680_read_bytes(0x22, (uint8_t *)(&bme680calib.temp_adc)+2, 1);
-	bme680calib.temp_adc >>= 4;
-	bme680calib.temp_adc &= 0x000FFFFF;
+	// Pressure calibration settings
+	bme680_read_bytes(0x8E, (uint8_t *)&bme680calib.par_p1, 2);
+	bme680_read_bytes(0x90, (uint8_t *)&bme680calib.par_p2, 2);
+	bme680_read_bytes(0x92, (uint8_t *)&bme680calib.par_p3, 1);
+	bme680_read_bytes(0x94, (uint8_t *)&bme680calib.par_p4, 2);
+	bme680_read_bytes(0x96, (uint8_t *)&bme680calib.par_p5, 2);
+	bme680_read_bytes(0x99, (uint8_t *)&bme680calib.par_p6, 1);
+	bme680_read_bytes(0x98, (uint8_t *)&bme680calib.par_p7, 1);
+	bme680_read_bytes(0x9C, (uint8_t *)&bme680calib.par_p8, 2);
+	bme680_read_bytes(0x9E, (uint8_t *)&bme680calib.par_p9, 2);
+	bme680_read_bytes(0xA0, (uint8_t *)&bme680calib.par_p10, 1);
+
+	// Humidity calibration settings
+	bme680_read_bytes(0xE2, (uint8_t *)&bme680calib.par_h1, 1);
+	bme680calib.par_h1 <<= 4;
+	bme680_read_bytes(0xE3, ((uint8_t *)&bme680calib.par_h1)+1, 1);
+	bme680calib.par_h1 >>= 4;
+	bme680calib.par_h1 &= 0x0FFF;
+	bme680_read_bytes(0xE1, (uint8_t *)&bme680calib.par_h2, 1);
+	bme680calib.par_h2 <<= 8;
+	bme680_read_bytes(0xE2, (uint8_t *)&bme680calib.par_h2, 1);
+	bme680calib.par_h2 >>= 4;
+	bme680_read_bytes(0xE4, (uint8_t *)&bme680calib.par_h3, 1);
+	bme680_read_bytes(0xE5, (uint8_t *)&bme680calib.par_h4, 1);
+	bme680_read_bytes(0xE6, (uint8_t *)&bme680calib.par_h5, 1);
+	bme680_read_bytes(0xE7, (uint8_t *)&bme680calib.par_h6, 1);
+	bme680_read_bytes(0xE8, (uint8_t *)&bme680calib.par_h7, 1);
 
 	return 0;
+}
+
+void bme680_print_calibration_setings() {
+	printf("Calibration settings:\n");
+	printf("\tpar_t1 = 0x%hX;\n", bme680calib.par_t1);
+	printf("\tpar_t2 = 0x%hX;\n", bme680calib.par_t2);
+	printf("\tpar_t3 = 0x%hhX;\n", bme680calib.par_t3);
+	printf("\tpar_p1 = 0x%hX;\n", bme680calib.par_p1);
+	printf("\tpar_p2 = 0x%hX;\n", bme680calib.par_p2);
+	printf("\tpar_p3 = 0x%hhX;\n", bme680calib.par_p3);
+	printf("\tpar_p4 = 0x%hX;\n", bme680calib.par_p4);
+	printf("\tpar_p5 = 0x%hX;\n", bme680calib.par_p5);
+	printf("\tpar_p6 = 0x%hhX;\n", bme680calib.par_p6);
+	printf("\tpar_p7 = 0x%hhX;\n", bme680calib.par_p7);
+	printf("\tpar_p8 = 0x%hX;\n", bme680calib.par_p8);
+	printf("\tpar_p9 = 0x%hX;\n", bme680calib.par_p9);
+	printf("\tpar_p10 = 0x%hhX;\n", bme680calib.par_p10);
+	printf("\tpar_h1 = 0x%hX;\n", bme680calib.par_h1);
+	printf("\tpar_h2 = 0x%hX;\n", bme680calib.par_h2);
+	printf("\tpar_h3 = 0x%hhX;\n", bme680calib.par_h3);
+	printf("\tpar_h4 = 0x%hhX;\n", bme680calib.par_h4);
+	printf("\tpar_h5 = 0x%hhX;\n", bme680calib.par_h5);
+	printf("\tpar_h6 = 0x%hhX;\n", bme680calib.par_h6);
+	printf("\tpar_h7 = 0x%hhX;\n", bme680calib.par_h7);
 }
 
 int bme680_reset() {
@@ -88,26 +128,57 @@ int bme680_read_results(Bme680Results *results) {
 	} while ((status & 0x80) >> 7);
 	uint8_t raw_results[8] = {0};
 	bme680_read_bytes(0x1F, raw_results, 8);
+	bme680_read_bytes(0x1F, &status, 1);
+	printf("0x1F: 0x%hhX, ", status);
+	bme680_read_bytes(0x20, &status, 1);
+	printf("0x20: 0x%hhX, ", status);
+	bme680_read_bytes(0x21, &status, 1);
+	printf("0x21: 0x%hhX\n", status);
 
-	uint32_t raw_pressure = raw_results[0] << 12;
+	uint32_t raw_pressure = 0;
+	raw_pressure |= raw_results[0] << 12;
 	raw_pressure |= raw_results[1] << 4;
 	raw_pressure |= (raw_results[2] >> 4) & 0x0F;
+	raw_pressure &= 0x000FFFFF;
 
 	uint32_t raw_temperature = raw_results[3] << 12;
 	raw_temperature |= raw_results[4] << 4;
 	raw_temperature |= (raw_results[5] >> 4) & 0x0F;
+	raw_temperature &= 0x000FFFFF;
 
 	uint16_t raw_humidity = raw_results[6] << 8;
 	raw_humidity |= raw_results[7];
 
-	// printf("Raw pressure: 0x%X\n", raw_pressure);
-	// printf("Raw temperature: 0x%X\n", raw_temperature);
-	// printf("Raw humidity: 0x%X\n", raw_humidity);
+	printf("\tRaw temperature: 0x%X\n\tRaw pressure: 0x%X\n\tRaw humidity: 0x%X\n", raw_temperature, raw_pressure, raw_humidity);
 
 	// temperature
 	double var1 = (raw_temperature/16384.0 - bme680calib.par_t1/1024.0)*bme680calib.par_t2;
 	double var2 = (raw_temperature/131072.0 - bme680calib.par_t1/8192.0)*(raw_temperature/131072.0 - bme680calib.par_t1/8192.0)*(bme680calib.par_t3*16.0);
 	results->temperature = (var1+var2)/5120.0;
+
+	// pressure
+	var1 = results->temperature/2.0-64000.0;
+	var2 = var1*var1*bme680calib.par_p6/131072.0;
+	var2 += var1*bme680calib.par_p5*2.0;
+	var2 = var2/4.0 + bme680calib.par_p4*65536.0;
+	var1 = (bme680calib.par_p3*var1*var1/16384.0 + bme680calib.par_p2*var1)/524288.0;
+	var1 = (1.0 + var1/32768.0)*bme680calib.par_p1;
+	double press_comp = 1048576.0 - raw_pressure;
+	press_comp = (press_comp - var2/4096.0)*6250.0/var1;
+	var1 = (bme680calib.par_p9*press_comp*press_comp)/2147483648.0;
+	var2 = press_comp*bme680calib.par_p8/32768.0;
+	double var3 = (press_comp/256.0)*(press_comp/256.0)*(press_comp/256.0)*(bme680calib.par_p10/131072.0);
+	press_comp = press_comp + (var1 + var2 + var3 + bme680calib.par_p7*128.0)/16.0;
+
+	results->pressure = press_comp;
+
+	// humidity
+	var1 = raw_humidity*1.0 - (bme680calib.par_h1*16.0 + (bme680calib.par_h3/2.0) * results->temperature);
+	var2 = var1 * ((bme680calib.par_h2 / 262144.0) * (1.0 + ((bme680calib.par_h4 / 16384.0) * results->temperature) + ((bme680calib.par_h5 / 1048576.0) * results->temperature * results->temperature)));
+	var3 = bme680calib.par_h6 / 16384.0;
+	double var4 = bme680calib.par_h7 / 2097152.0;
+	double calc_hum = var2 + ((var3 + (var4 * results->temperature)) * var2 * var2);
+	results->humidity = calc_hum;
 
 	return 0;
 }
