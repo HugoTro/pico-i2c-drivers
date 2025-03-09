@@ -39,26 +39,26 @@ In the register parameters shown below, x indicates another unrelated value. It 
 
 ## LSM6DSOX
 ### Scale settings:
- - Accelerometer scale selection (**ctrl1_xl**), Table 52:
-	±2g: 0bxxxx00xx
-	±4g: 0bxxxx10xx
-	±8g: 0bxxxx11xx
-	±16g: 0bxxxx01xx
+ - Accelerometer scale selection (**ctrl1_xl**), Table 52:<br/>
+	±2g: 0bxxxx00xx<br/>
+	±4g: 0bxxxx10xx<br/>
+	±8g: 0bxxxx11xx<br/>
+	±16g: 0bxxxx01xx<br/>
 
 ### Output Data Rate settings:
- - Accelerometer ODR (**ctrl1_xl**), Table 51:
-	Power down: 0b0000xxxx
-	*low-power mode*
-	01.6Hz: 0b1011xxxx
-	12.5Hz: 0b0001xxxx
-	26.0Hz: 0b0010xxxx
-	52.0Hz: 0b0011xxxx
-	*normal mode*
-	104Hz: 0b0100xxxx
-	208Hz: 0b0101xxxx
-	*high performance mode*
-	416Hz: 0b0110xxxx
-	833Hz: 0b0111xxxx
-	1.66kHz: 0b1000xxxx
-	3.33kHz: 0b1001xxxx
-	6.66kHz: 0b1010xxxx
+ - Accelerometer ODR (**ctrl1_xl**), Table 51:<br/>
+	Power down: 0b0000xxxx<br/>
+	*low-power mode*<br/>
+	01.6Hz: 0b1011xxxx<br/>
+	12.5Hz: 0b0001xxxx<br/>
+	26.0Hz: 0b0010xxxx<br/>
+	52.0Hz: 0b0011xxxx<br/>
+	*normal mode*<br/>
+	104Hz: 0b0100xxxx<br/>
+	208Hz: 0b0101xxxx<br/>
+	*high performance mode*<br/>
+	416Hz: 0b0110xxxx<br/>
+	833Hz: 0b0111xxxx<br/>
+	1.66kHz: 0b1000xxxx<br/>
+	3.33kHz: 0b1001xxxx<br/>
+	6.66kHz: 0b1010xxxx<br/>
