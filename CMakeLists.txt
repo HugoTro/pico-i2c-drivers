@@ -4,7 +4,7 @@ include(pico_sdk_import.cmake)
 project(i2c-drivers)
 pico_sdk_init()
 
-set(PICOTOOL_FORCE_FETCH_FROM_GIT 1)
+# set(PICOTOOL_FORCE_FETCH_FROM_GIT 1)
 
 if (TARGET tinyusb_device)
     add_executable(test src/test.c src/bme680.c src/bmp280.c src/fonts.c src/sh1106.c)

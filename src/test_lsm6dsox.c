@@ -13,17 +13,18 @@ int main() {
 
 	// 104Hz and ±8g, 104Hz and ±1000°/s
 	lsm6dsox_init(0b01001100, 0b01001000);
-	int16_t temperature = 0;
+	lsm6dsoxAcceleration acc;
+	lsm6dsoxAngVel ang_vel;
+	float temperature = 0;
 	while (1) {
-		uint8_t whoishe = 0;
-		lsm6dsox_get_whoami(&whoishe);
 		lsm6dsox_get_temperature(&temperature);
-		int16_t out_x = 0;
-		lsm6dsox_read_bytes(0x22, (uint8_t *)&out_x, 2);
-		printf("identifier: 0x%hhX, temperature: %hd\n\tout_x: %hd\n", whoishe, temperature, out_x);
-		sleep_ms(1000);
+		lsm6dsox_get_acceleration(&acc);
+		lsm6dsox_get_angular_velocity(&ang_vel);
+		printf("Acceleration:\n\tx: %.3fg\n\ty: %.3fg\n\tz: %.3fg\n", acc.x, acc.y, acc.z);
+		printf("Angular velocity:\n\tx: %.3f°/s\n\ty: %.3f°/s\n\tz: %.3f°/s\n", ang_vel.x, ang_vel.y, ang_vel.z);
+		printf("temperature: %.3f°C\n\n", temperature);
+		sleep_ms(100);
 	}
-	
 }
 
 uint32_t i2c_setup() {
