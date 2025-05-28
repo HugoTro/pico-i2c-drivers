@@ -15,6 +15,7 @@ int main() {
 
 	printf("I2C setup: %u\n", i2c_setup());
 	// x1 ovs on all values but temperature: x4
+	bme680_setup(i2c0, 0x76);
 	int status = bme680_init(0b01101100, 0b00000001);
 	if (status) {
 		printf("Could not intialize bme680 with error code %d\n", status);

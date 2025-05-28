@@ -2,6 +2,11 @@
 
 Bme680CalibrationSettings bme680calib;
 
+void bme680_setup(i2c_inst_t *i2c_channel, uint8_t i2c_address) {
+	BME680_I2C_STRUCT = i2c_channel;
+	BME680_ADDRESS = i2c_address;
+}
+
 /*!
  * \brief Initializes the bme680. Must be called before any other function.
  * It will use the address and i2c channel given in bme680.h

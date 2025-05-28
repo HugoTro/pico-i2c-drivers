@@ -11,6 +11,7 @@ int main() {
 
 	printf("I2C setup: %u\n", i2c_setup());
 
+	lsm6dsox_setup(i2c1, 0x6A);
 	// 104Hz and ±8g, 104Hz and ±1000°/s
 	lsm6dsox_init(0b01001100, 0b01001000);
 	lsm6dsoxAcceleration acc;

@@ -8,8 +8,8 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-#define BME680_ADDRESS 0x76
-#define BME680_I2C_STRUCT i2c0
+uint8_t BME680_ADDRESS;
+i2c_inst_t *BME680_I2C_STRUCT;
 
 struct Bme680CalibrationSettings {
 	// temperature calibration variables
@@ -46,6 +46,7 @@ struct Bme680Results {
 };
 typedef struct Bme680Results Bme680Results;
 
+void bme680_setup(i2c_inst_t *, uint8_t);
 int bme680_init(uint8_t, uint8_t);
 int bme680_init_calibration_settings();
 void bme680_print_calibration_setings();

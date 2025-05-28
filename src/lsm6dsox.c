@@ -1,5 +1,10 @@
 #include "lsm6dsox.h"
 
+void lsm6dsox_setup(i2c_inst_t *i2c_channel, uint8_t i2c_address) {
+	LSM6DSOX_I2C_STRUCT = i2c_channel;
+	LSM6DSOX_ADDRESS = i2c_address;
+}
+
 int lsm6dsox_init(uint8_t ctrl1_xl, uint8_t ctrl2_g) {
 	// Disable MIPI I3C
 	lsm6dsox_change_register(0x18, 0x03, 0x03);
@@ -82,7 +87,7 @@ int lsm6dsox_write_bytes(uint8_t address, uint8_t *data, uint8_t data_len) {
 		lsm6dsox_read_bytes(address, &read_value, 1);
 		printf("Confirming written value:\n\twanted: 0x%hhX\n\tactual: 0x%hhX\n", *data, read_value);
 		return ret;
-	}	
+	}
 	return -1;
 }
 
