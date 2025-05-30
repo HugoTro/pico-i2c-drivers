@@ -8,9 +8,6 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-uint8_t BME680_ADDRESS;
-i2c_inst_t *BME680_I2C_STRUCT;
-
 struct Bme680CalibrationSettings {
 	// temperature calibration variables
 	uint16_t par_t1;

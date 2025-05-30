@@ -1,5 +1,7 @@
 #include "bme680.h"
 
+uint8_t BME680_ADDRESS;
+i2c_inst_t *BME680_I2C_STRUCT;
 Bme680CalibrationSettings bme680calib;
 
 void bme680_setup(i2c_inst_t *i2c_channel, uint8_t i2c_address) {

@@ -8,9 +8,6 @@
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-uint8_t LSM6DSOX_ADDRESS;
-i2c_inst_t *LSM6DSOX_I2C_STRUCT;
-
 #define LSM6DSOX_ACC_SENSITIVITY 8 // Should be the ±x g you put in ctrl1_xl
 #define LSM6DSOX_ANG_SENSITIVITY 1000 // same but for °/s
 

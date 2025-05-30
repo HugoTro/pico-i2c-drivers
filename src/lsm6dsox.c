@@ -1,5 +1,8 @@
 #include "lsm6dsox.h"
 
+uint8_t LSM6DSOX_ADDRESS;
+i2c_inst_t *LSM6DSOX_I2C_STRUCT;
+
 void lsm6dsox_setup(i2c_inst_t *i2c_channel, uint8_t i2c_address) {
 	LSM6DSOX_I2C_STRUCT = i2c_channel;
 	LSM6DSOX_ADDRESS = i2c_address;
