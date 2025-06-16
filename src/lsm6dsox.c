@@ -119,7 +119,7 @@ int lsm6dsox_init(uint8_t acc_odr, uint8_t acc_mode, uint8_t acc_scale, uint8_t 
 	
 	// CTRL2_G
 	ret += lsm6dsox_change_register(0x11, gyro_odr | gyro_scale, 0xFE);
-	return 0;
+	return ret;
 }
 
 int lsm6dsox_reset() {
