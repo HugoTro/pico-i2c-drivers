@@ -1,7 +1,7 @@
 #include "lsm6dsox.h"
 
 #define I2C_BAUDRATE 400000
-
+#define I2C_STRUCT i2c1
 
 uint32_t i2c_setup();
 
@@ -11,9 +11,8 @@ int main() {
 
 	printf("I2C setup: %u\n", i2c_setup());
 
-	lsm6dsox_setup(i2c1, 0x6A);
-	// 104Hz and ±8g, 104Hz and ±1000°/s
-	lsm6dsox_init(0b01001100, 0b01001000);
+	lsm6dsox_setup(I2C_STRUCT, 0x6A);
+	lsm6dsox_init(LSM6DSOX_ACC_ODR_104HZ, LSM6DSOX_ACC_ALLOW_ALL_MODES, LSM6DSOX_ACC_SCALE_8G, LSM6DSOX_GYRO_ODR_104HZ, LSM6DSOX_GYRO_ALLOW_ALL_MODES, LSM6DSOX_GYRO_SCALE_1000DPS);
 	lsm6dsoxAcceleration acc;
 	lsm6dsoxAngVel ang_vel;
 	float temperature = 0;
@@ -29,7 +28,7 @@ int main() {
 }
 
 uint32_t i2c_setup() {
-	uint32_t ret = i2c_init(LSM6DSOX_I2C_STRUCT, I2C_BAUDRATE);
+	uint32_t ret = i2c_init(I2C_STRUCT, I2C_BAUDRATE);
 	gpio_set_function(18, GPIO_FUNC_I2C);
 	gpio_set_function(19, GPIO_FUNC_I2C);
 	return ret;

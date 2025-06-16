@@ -2,26 +2,123 @@
 
 uint8_t LSM6DSOX_ADDRESS;
 i2c_inst_t *LSM6DSOX_I2C_STRUCT;
+uint8_t LSM6DSOX_ACC_SENSITIVITY;
+uint16_t LSM6DSOX_GYRO_SENSITIVITY;
 
 void lsm6dsox_setup(i2c_inst_t *i2c_channel, uint8_t i2c_address) {
 	LSM6DSOX_I2C_STRUCT = i2c_channel;
 	LSM6DSOX_ADDRESS = i2c_address;
 }
 
-int lsm6dsox_init(uint8_t ctrl1_xl, uint8_t ctrl2_g) {
-	// Disable MIPI I3C
-	lsm6dsox_change_register(0x18, 0x03, 0x03);
-	// Change ctrl6_c to disable high preformance operation (only broadens the possible range of choices of accelerometer ODRs)
-	lsm6dsox_change_register(0x15, 0x10, 0x10);
+i2c_inst_t *lsm6dsox_get_i2c_struct() {
+	return LSM6DSOX_I2C_STRUCT;
+}
 
-	// same for ctrl7_g
-	lsm6dsox_change_register(0x16, 0x80, 0x80);
+/*!
+ * \brief Initializes the LSM6DSOX.
+ * \param acc_odr one of LSM6DSOX_ACC_ODR_xxxHZ
+ * \param acc_mode 0 or LSM6DSOX_ACC_ALLOW_ALL_MODES
+ * \param acc_scale one of LSM6DSOX_ACC_SCALE_xxx
+ * \param gyro_odr one of LSM6DSOX_GYRO_ODR_xxxHZ
+ * \param gyro_mode 0 or LSM6DSOX_GYRO_ALLOW_ALL_MODES
+ * \param gyro_scale one of LSM6DSOX_GYRO_SCALE_xxx
+*/
+int lsm6dsox_init(uint8_t acc_odr, uint8_t acc_mode, uint8_t acc_scale, uint8_t gyro_odr, uint8_t gyro_mode, uint8_t gyro_scale) {
+	uint8_t ret = 0;
+	// Disable MIPI I3C, we don't need it.
+	ret += lsm6dsox_change_register(0x18, 0x03, 0x03);
+	// Check parameters
+	switch (acc_odr) {
+		case LSM6DSOX_ACC_ODR_1_6HZ:
+		case LSM6DSOX_ACC_ODR_12_5HZ:
+		case LSM6DSOX_ACC_ODR_26HZ:
+		case LSM6DSOX_ACC_ODR_52HZ:
+		case LSM6DSOX_ACC_ODR_104HZ:
+		case LSM6DSOX_ACC_ODR_208HZ:
+		case LSM6DSOX_ACC_ODR_416HZ:
+		case LSM6DSOX_ACC_ODR_833HZ:
+		case LSM6DSOX_ACC_ODR_1660HZ:
+		case LSM6DSOX_ACC_ODR_3330HZ:
+		case LSM6DSOX_ACC_ODR_6660HZ:
+			break;
+		default:
+			return -1;
+	}
+	switch (gyro_odr) {
+		case LSM6DSOX_GYRO_ODR_12_5HZ:
+		case LSM6DSOX_GYRO_ODR_26HZ:
+		case LSM6DSOX_GYRO_ODR_52HZ:
+		case LSM6DSOX_GYRO_ODR_104HZ:
+		case LSM6DSOX_GYRO_ODR_208HZ:
+		case LSM6DSOX_GYRO_ODR_416HZ:
+		case LSM6DSOX_GYRO_ODR_833HZ:
+		case LSM6DSOX_GYRO_ODR_1660HZ:
+		case LSM6DSOX_GYRO_ODR_3330HZ:
+		case LSM6DSOX_GYRO_ODR_6660HZ:
+			break;
+		default:
+			return -2;
+	}
+	switch (acc_mode) {
+		case LSM6DSOX_ACC_ALLOW_ALL_MODES:
+		case 0:
+			break;
+		default:
+			return -3;
+	}
+	switch (gyro_mode) {
+		case LSM6DSOX_GYRO_ALLOW_ALL_MODES:
+		case 0:
+			break;
+		default:
+			return -3;
+	}
+	switch (acc_scale) {
+		case LSM6DSOX_ACC_SCALE_2G:
+			LSM6DSOX_ACC_SENSITIVITY = 2;
+			break;
+		case LSM6DSOX_ACC_SCALE_4G:
+			LSM6DSOX_ACC_SENSITIVITY = 4;
+			break;
+		case LSM6DSOX_ACC_SCALE_8G:
+			LSM6DSOX_ACC_SENSITIVITY = 8;
+			break;
+		case LSM6DSOX_ACC_SCALE_16G:
+			LSM6DSOX_ACC_SENSITIVITY = 16;
+			break;
+		default:
+			return -4;
+	}
+	switch (gyro_scale) {
+		case LSM6DSOX_GYRO_SCALE_250DPS:
+			LSM6DSOX_GYRO_SENSITIVITY = 250;
+			break;
+		case LSM6DSOX_GYRO_SCALE_500DPS:
+			LSM6DSOX_GYRO_SENSITIVITY = 500;
+			break;
+		case LSM6DSOX_GYRO_SCALE_1000DPS:
+			LSM6DSOX_GYRO_SENSITIVITY = 1000;
+			break;
+		case LSM6DSOX_GYRO_SCALE_2000DPS:
+			LSM6DSOX_GYRO_SENSITIVITY = 2000;
+			break;
+		default:
+			return -5;
+	}
+	// All parameters are checked, we can continue with the function.
 
-	// Change ctrl1_xl reg
-	lsm6dsox_change_register(0x10, ctrl1_xl, 0xFC);
+	// set accelerometer mode (always high perf or as is described in table 51)
+	// CTRL6_C
+	ret += lsm6dsox_change_register(0x15, acc_mode, 0x10);
 
-	// Change ctrl2_g reg
-	lsm6dsox_change_register(0x11, ctrl2_g, 0xFE);
+	// CTRL1_XL
+	ret += lsm6dsox_change_register(0x10, acc_odr | acc_scale, 0xFC);
+
+	// CTRL7_G
+	ret += lsm6dsox_change_register(0x16, gyro_mode, 0x80);
+	
+	// CTRL2_G
+	ret += lsm6dsox_change_register(0x11, gyro_odr | gyro_scale, 0xFE);
 	return 0;
 }
 
@@ -32,7 +129,7 @@ int lsm6dsox_reset() {
 	uint8_t ctrl3_c = 0;
 	do {
 		lsm6dsox_read_bytes(0x12, &ctrl3_c, 1);
-		printf("ctrl3_c: 0x%hhX\n", ctrl3_c);
+		// printf("ctrl3_c: 0x%hhX\n", ctrl3_c);
 		sleep_ms(500);
 	} while (ctrl3_c%2==1);
 	return 0;
@@ -62,9 +159,9 @@ int lsm6dsox_get_acceleration(lsm6dsoxAcceleration *acc) {
 int lsm6dsox_get_angular_velocity(lsm6dsoxAngVel *ang_vel) {
 	int16_t raw_vel[3] = {0};
 	int ret = lsm6dsox_read_bytes(0x22, (uint8_t *)raw_vel, 6);
-	ang_vel->x = raw_vel[0]*LSM6DSOX_ANG_SENSITIVITY/32768.0;
-	ang_vel->y = raw_vel[1]*LSM6DSOX_ANG_SENSITIVITY/32768.0;
-	ang_vel->z = raw_vel[2]*LSM6DSOX_ANG_SENSITIVITY/32768.0;
+	ang_vel->x = raw_vel[0]*LSM6DSOX_GYRO_SENSITIVITY/32768.0;
+	ang_vel->y = raw_vel[1]*LSM6DSOX_GYRO_SENSITIVITY/32768.0;
+	ang_vel->z = raw_vel[2]*LSM6DSOX_GYRO_SENSITIVITY/32768.0;
 	return ret;
 }
 
@@ -85,10 +182,10 @@ int lsm6dsox_write_bytes(uint8_t address, uint8_t *data, uint8_t data_len) {
 	if (data_len==1) {
 		uint8_t buffer[2] = {address, *data};
 		int ret = i2c_write_blocking(LSM6DSOX_I2C_STRUCT, LSM6DSOX_ADDRESS, buffer, 2, 0);
-		printf("Code for value 0x%hhX to reg 0x%hhX [%hhX]: %d\n", *data, data_len, address, ret);
+		// printf("Code for value 0x%hhX to reg 0x%hhX [%hhX]: %d\n", *data, data_len, address, ret);
 		uint8_t read_value = 0;
 		lsm6dsox_read_bytes(address, &read_value, 1);
-		printf("Confirming written value:\n\twanted: 0x%hhX\n\tactual: 0x%hhX\n", *data, read_value);
+		// printf("Confirming written value:\n\twanted: 0x%hhX\n\tactual: 0x%hhX\n", *data, read_value);
 		return ret;
 	}
 	return -1;
